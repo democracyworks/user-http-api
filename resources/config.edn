@@ -1,0 +1,7 @@
+{:rabbitmq {:connection {:host #resource-config/env "RABBITMQ_PORT_5672_TCP_ADDR"
+                         :port #resource-config/edn #resource-config/env "RABBITMQ_PORT_5672_TCP_PORT"}
+            :queues {"user-http-api.ok" {:exclusive false :durable true :auto-delete false}}}
+ :datomic {:uri "datomic:mem://user-http-api"
+           :partition :user-http-api
+           :intitialize true
+           :run-migrations true}}
