@@ -1,6 +1,8 @@
 # user-http-api
 
-TODO: Add description
+A REST API for managing voters.
+
+[![Build status](https://badge.buildkite.com/cff715ecfc18328abe04bcb114bf9103c1e83f52fcc4b528d6.svg)](https://buildkite.com/democracyworks/user-http-api)
 
 ## Configuration
 
