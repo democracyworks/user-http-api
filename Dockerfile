@@ -3,7 +3,6 @@ FROM quay.io/democracyworks/didor:latest
 RUN mkdir -p /usr/src/user-http-api
 WORKDIR /usr/src/user-http-api
 
-COPY profiles.clj /usr/src/user-http-api/
 COPY project.clj /usr/src/user-http-api/
 
 RUN lein deps

@@ -32,15 +32,6 @@ TODO: Add usage
 
 ### With docker-compose
 
-First, create a `profiles.clj`.
-
-```
-> cp profiles.clj.sample profiles.clj
-```
-
-Edit the datomic username and password in `profiles.clj` (it won't be
-added to git).
-
 Build it:
 
 ```
