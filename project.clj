@@ -21,7 +21,7 @@
 
                  [democracyworks/kehaar "0.3.0"]]
   :plugins [[lein-immutant "2.0.0"]]
-  :main ^:skip-aot user-http-api.core
+  :main ^:skip-aot user-http-api.server
   :target-path "target/%s"
   :uberjar-name "user-http-api.jar"
   :profiles {:uberjar {:aot :all}
