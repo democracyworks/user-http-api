@@ -9,6 +9,13 @@
             [user-http-api.handlers :as handlers]
             [turbovote.resource-config :refer [config]]))
 
+(defn uber-wire-up!
+  [rabbit-ch async-ch queue-name]
+  (lq/declare rabbit-ch
+              queue-name
+              (config :rabbitmq :queues queue-name))
+  (k/wire-up-service rabbit-ch queue-name async-ch))
+
 (defn initialize []
   (let [connection (atom nil)
         max-retries 5]
@@ -19,20 +26,26 @@
                                  {})))
         (log/info "RabbitMQ connected.")
         (catch Throwable t
-          (log/warn "RabbitMQ not available:" (.getMessage t) "attempt:" attempt)))
+          (log/warn "RabbitMQ not available:" (.getMessage t)
+                    "attempt:" attempt)))
       (when (nil? @connection)
         (if (< attempt max-retries)
           (do (Thread/sleep (* attempt 1000))
               (recur (inc attempt)))
           (do (log/error "Connecting to RabbitMQ failed. Bailing.")
-              (throw (ex-info "Connecting to RabbitMQ failed" {:attempts attempt}))))))
-    (let [ok-ch (lch/open @connection)]
+              (throw (ex-info "Connecting to RabbitMQ failed"
+                              {:attempts attempt}))))))
+    (let [ok-ch (lch/open @connection)
+          user-create-ch (lch/open @connection)]
       (lq/declare ok-ch
                   "user-http-api.ok"
                   (config :rabbitmq :queues "user-http-api.ok"))
       (k/responder ok-ch "user-http-api.ok" handlers/ok)
+      (uber-wire-up! user-create-ch
+                     channels/create-users
+                     "user-works.user.create")
       {:connections #{@connection}
-       :channels #{ok-ch}})))
+       :channels #{ok-ch user-create-ch}})))
 
 (defn close-resources! [resources]
   (doseq [resource resources]

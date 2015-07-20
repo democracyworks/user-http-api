@@ -14,6 +14,22 @@
    (fn [request]
      (ring-resp/response "OK"))))
 
+(def create-user
+  (handler
+   (fn [{:keys [first-name last-name email phone address
+                registered-street registered-city registered-state
+                registered-zip] :as request}]
+     (let [user {:first-name first-name
+                 :last-name last-name
+                 :phone phone
+                 :address address
+                 :registered
+                 {:street registered-street
+                  :city registered-city
+                  :state registered-state
+                  :zip registered-zip}}]
+       (ring-resp/response "Created user" user)))))
+
 (def global-interceptors
   [(body-params)])
 
@@ -35,7 +51,8 @@
   `[[["/"
       ^:interceptors [~@global-interceptors
                       query-param-content-type]
-      ["/ping" {:get [:ping ping]}]]]])
+      ["/ping" {:get [:ping ping]}]
+      ["/users" {:post [:users create-user]}]]]])
 
 (def routes
   (mapcat expand-routes [api-routes]))

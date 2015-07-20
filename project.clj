@@ -14,7 +14,8 @@
                  [democracyworks/pedestal-toolbox "0.6.0"]
 
                  ;; this has to go before pedestal.immutant
-                 ;; until this is fixed: https://github.com/pedestal/pedestal/issues/33
+                 ;; until this is fixed:
+                 ;; https://github.com/pedestal/pedestal/issues/33
                  [org.immutant/web "2.0.1"]
                  [io.pedestal/pedestal.immutant "0.4.0"]
                  [org.immutant/core "2.0.1"]
