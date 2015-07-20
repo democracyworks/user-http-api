@@ -1,6 +1,6 @@
 # user-http-api
 
-A REST API for managing voters.
+A REST API gateway for managing users.
 
 [![Build status](https://badge.buildkite.com/cff715ecfc18328abe04bcb114bf9103c1e83f52fcc4b528d6.svg)](https://buildkite.com/democracyworks/user-http-api)
 
