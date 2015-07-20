@@ -1,6 +1,6 @@
 (defproject user-http-api "0.1.0-SNAPSHOT"
-  :description ""
-  :url "http://example.com/FIXME"
+  :description "HTTP API gateway for managing users"
+  :url "https://github.com/democracyworks/user-http-api"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.7.0"]
