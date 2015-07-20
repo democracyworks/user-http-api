@@ -5,16 +5,10 @@
             [langohr.exchange :as le]
             [langohr.queue :as lq]
             [kehaar.core :as k]
+            [kehaar.wire-up :as wire-up]
             [user-http-api.channels :as channels]
             [user-http-api.handlers :as handlers]
             [turbovote.resource-config :refer [config]]))
-
-(defn uber-wire-up!
-  [rabbit-ch async-ch queue-name]
-  (lq/declare rabbit-ch
-              queue-name
-              (config :rabbitmq :queues queue-name))
-  (k/wire-up-service rabbit-ch queue-name async-ch))
 
 (defn initialize []
   (let [connection (atom nil)
@@ -22,7 +16,7 @@
     (loop [attempt 1]
       (try
         (reset! connection
-                (rmq/connect (or (config :rabbitmq :connection)
+                (rmq/connect (or (config [:rabbitmq :connection])
                                  {})))
         (log/info "RabbitMQ connected.")
         (catch Throwable t
@@ -35,17 +29,17 @@
           (do (log/error "Connecting to RabbitMQ failed. Bailing.")
               (throw (ex-info "Connecting to RabbitMQ failed"
                               {:attempts attempt}))))))
-    (let [ok-ch (lch/open @connection)
-          user-create-ch (lch/open @connection)]
-      (lq/declare ok-ch
-                  "user-http-api.ok"
-                  (config :rabbitmq :queues "user-http-api.ok"))
-      (k/responder ok-ch "user-http-api.ok" handlers/ok)
-      (uber-wire-up! user-create-ch
-                     channels/create-users
-                     "user-works.user.create")
-      {:connections #{@connection}
-       :channels #{ok-ch user-create-ch}})))
+    {:connections [@connection]
+     :channels [(wire-up/incoming-service-handler
+                 @connection
+                 "user-http-api.ok"
+                 (config [:rabbitmq :queues "user-http-api.ok"])
+                 handlers/ok)
+                (wire-up/external-service-channel
+                 @connection
+                 "user-works.user.create"
+                 (config [:rabbitmq :queues "user-works.user.create"])
+                 channels/create-users)]}))
 
 (defn close-resources! [resources]
   (doseq [resource resources]

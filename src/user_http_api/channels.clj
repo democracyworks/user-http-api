@@ -27,7 +27,6 @@
     {:stop! (fn [] (async/put! stop-chan :stop))
      :notes signal-chan}))
 
-;;; TODO: Create channels and add them to the list of channels to close.
 (defn close-all! []
   (doseq [c [create-users]]
     (async/close! c)))
