@@ -1,7 +1,7 @@
 (ns user-http-api.service
   (:require [io.pedestal.http :as bootstrap]
             [io.pedestal.http.route :as route]
-            [io.pedestal.http.route.definition :refer [expand-routes]]
+            [io.pedestal.http.route.definition :refer [defroutes]]
             [io.pedestal.interceptor.helpers :refer [handler]]
             [io.pedestal.interceptor :refer [interceptor]]
             [ring.util.response :as ring-resp]
@@ -28,10 +28,7 @@
                   :city registered-city
                   :state registered-state
                   :zip registered-zip}}]
-       (ring-resp/response "Created user" user)))))
-
-(def global-interceptors
-  [(body-params)])
+       (ring-resp/created "/placeholder" user)))))
 
 (def query-param-content-type
   "An enter interceptor that fakes an Accept header so that later
@@ -47,21 +44,17 @@
         (assoc-in ctx [:request :headers "accept"] content-type)
         ctx))}))
 
-(def api-routes
-  `[[["/"
-      ^:interceptors [~@global-interceptors
-                      query-param-content-type]
-      ["/ping" {:get [:ping ping]}]
-      ["/users" {:post [:users create-user]}]]]])
-
-(def routes
-  (mapcat expand-routes [api-routes]))
+(defroutes routes
+  [[["/"
+     ^:interceptors [body-params
+                     query-param-content-type]
+     ["/ping" {:get [:ping ping]}]
+     ["/users" {:post [:users create-user]}]]]])
 
 (defn service []
-  (println "Starting Wildfly on port" (config :server :port))
   {::env :prod
    ::bootstrap/routes routes
    ::bootstrap/resource-path "/public"
-   ::bootstrap/host (config :server :hostname)
+   ::bootstrap/host (config [:server :hostname])
    ::bootstrap/type :immutant
-   ::bootstrap/port (config :server :port)})
+   ::bootstrap/port (config [:server :port])})
