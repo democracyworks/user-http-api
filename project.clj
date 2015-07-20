@@ -5,12 +5,12 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/tools.logging "0.3.1"]
-                 [turbovote.resource-config "0.1.4"]
+                 [turbovote.resource-config "0.2.0"]
                  [com.novemberain/langohr "3.2.0"]
                  [prismatic/schema "0.4.3"]
                  [ch.qos.logback/logback-classic "1.1.3"]
-                 [org.immutant/core "2.0.1"]
-                 [democracyworks/kehaar "0.3.0"]]
+                 [org.immutant/core "2.0.2"]
+                 [democracyworks/kehaar "0.4.0"]]
   :plugins [[lein-immutant "2.0.0"]]
   :main ^:skip-aot user-http-api.core
   :target-path "target/%s"
