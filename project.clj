@@ -28,4 +28,6 @@
   :profiles {:uberjar {:aot :all}
              :dev-common {:resource-paths ["dev-resources"]}
              :dev-overrides {}
-             :dev [:dev-common :dev-overrides]})
+             :dev [:dev-common :dev-overrides]
+             :test {:dependencies [[clj-http "2.0.0"]]
+                    :jvm-opts ["-Dlog-level=INFO"]}})

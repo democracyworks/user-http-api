@@ -10,9 +10,13 @@
   (channels/close-all!)
   (queue/close-all! rabbit-resources))
 
+(defn start-http-server [& [options]]
+  (-> (service/service)
+      (merge options)
+      http/create-server
+      http/start))
+
 (defn -main [& args]
   (let [rabbit-resources (queue/initialize)]
-    (-> (service/service)
-        http/create-server
-        http/start)
+    (start-http-server)
     (immutant/at-exit (partial shutdown rabbit-resources))))
