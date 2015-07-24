@@ -29,7 +29,7 @@
        (close! response-ch)))))
 
 (deftest create-user-test
-  (testing "valid EDN POST to /users sends user-works.user.create message"
+  (testing "valid EDN POST to /users puts create message on create-users channel"
     (let [user-data {:first-name "Troy"
                      :last-name "Tulowitski"
                      :email "troy@rockies.mlb.com"}]
@@ -41,7 +41,7 @@
             create-data (clojure.edn/read-string (:body response))]
         (is (= 201 (:status response)))
         (is (= "Tulowitski" (:last-name create-data))))))
-  (testing "valid Transit+JSON POST to /users creates user"
+  (testing "valid Transit+JSON POST to /users puts create message on create-users channel"
     (let [user-data {:first-name "Troy"
                      :last-name "Tulowitski"
                      :email "troy@rockies.mlb.com"}]
@@ -75,7 +75,7 @@
         (is (= "Fake error" (:message create-data)))))))
 
 (deftest read-user-test
-  (testing "GET to /users/:id of existing user sends user-works.user.read message"
+  (testing "GET to /users/:id of existing user puts read message on read-users channel"
     (let [user-id (java.util.UUID/randomUUID)
           user-data {:id user-id
                      :first-name "Troy"
@@ -111,3 +111,80 @@
       (is (= 500 (:status response)))
       (is (= :error (:status read-data)))
       (is (= "No such user" (:message read-data))))))
+
+(deftest update-user-test
+  (testing "PUT to /users/:id of existing user puts update message on update-users channel"
+    (let [user-id (java.util.UUID/randomUUID)
+          user-data {:first-name "Troy"
+                     :last-name "Hill"
+                     :email "escpawed@example.com"}]
+      (dummy-response channels/update-users {:user user-data})
+      (let [response (http/put (str root-url "/users/" user-id)
+                               {:body (pr-str user-data)
+                                :content-type :edn
+                                :accept :edn})
+            update-data (clojure.edn/read-string (:body response))]
+        (is (= 200 (:status response)))
+        (is (= "Hill" (:last-name update-data))))))
+  (testing "PATCH existing /users/:id with Transit+JSON body & response"
+    (let [user-id (java.util.UUID/randomUUID)
+          user-data {:first-name "Troy"
+                     :last-name "Tulowitski"
+                     :email "troy@rockies.mlb.com"}]
+      (dummy-response channels/update-users {:user user-data})
+      (let [transit-out (ByteArrayOutputStream.)
+            transit-writer (transit/writer transit-out :json)
+            post-body (do (transit/write transit-writer user-data)
+                          (.toString transit-out "UTF-8"))
+            response (http/patch (str root-url "/users/" user-id)
+                                 {:body post-body
+                                  :content-type :transit+json
+                                  :accept :transit+json})
+            transit-in (ByteArrayInputStream. (-> response
+                                                  :body
+                                                  (.getBytes "UTF-8")))
+            transit-reader (transit/reader transit-in :json)
+            update-data (transit/read transit-reader)]
+        (is (= 200 (:status response)))
+        (is (= "Tulowitski" (:last-name update-data))))))
+  (testing "PUT non-existent /users/:id returns error"
+    (dummy-response channels/update-users {:message "No such user"} :error)
+    (let [response (http/put (str root-url "/users/" (java.util.UUID/randomUUID))
+                             {:body (pr-str {})
+                              :content-type :edn
+                              :accept :edn
+                              :throw-exceptions false})
+          update-data (clojure.edn/read-string (:body response))]
+      (is (= 500 (:status response)))
+      (is (= :error (:status update-data)))
+      (is (= "No such user" (:message update-data))))))
+
+(deftest delete-user-test
+  (testing "DELETE to /users/:id of existing user puts delete message on delete-users channel"
+    (let [user-id (java.util.UUID/randomUUID)]
+      (dummy-response channels/delete-users {:user {:id user-id}})
+      (let [response (http/delete (str root-url "/users/" user-id)
+                                  {:accept :edn})
+            delete-data (clojure.edn/read-string (:body response))]
+        (is (= 200 (:status response)))
+        (is (= user-id (:id delete-data))))))
+  (testing "DELETE existing /users/:id with Transit+JSON response"
+    (let [user-id (java.util.UUID/randomUUID)]
+      (dummy-response channels/delete-users {:user {:id user-id}})
+      (let [response (http/delete (str root-url "/users/" user-id)
+                                  {:accept :transit+json})
+            transit-in (ByteArrayInputStream. (-> response
+                                                  :body
+                                                  (.getBytes "UTF-8")))
+            transit-reader (transit/reader transit-in :json)
+            delete-data (transit/read transit-reader)]
+        (is (= 200 (:status response)))
+        (is (= user-id (:id delete-data))))))
+  (testing "DELETE non-existent /users/:id returns error"
+    (dummy-response channels/delete-users {:message "No such user"} :error)
+    (let [response (http/delete (str root-url "/users/" (java.util.UUID/randomUUID))
+                                {:accept :edn, :throw-exceptions false})
+          delete-data (clojure.edn/read-string (:body response))]
+      (is (= 500 (:status response)))
+      (is (= :error (:status delete-data)))
+      (is (= "No such user" (:message delete-data))))))
