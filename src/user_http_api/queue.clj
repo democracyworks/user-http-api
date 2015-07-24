@@ -39,7 +39,22 @@
                  @connection
                  "user-works.user.create"
                  (config [:rabbitmq :queues "user-works.user.create"])
-                 channels/create-users)]}))
+                 channels/create-users)
+                (wire-up/external-service-channel
+                 @connection
+                 "user-works.user.read"
+                 (config [:rabbitmq :queues "user-works.user.read"])
+                 channels/read-users)
+                (wire-up/external-service-channel
+                 @connection
+                 "user-works.user.update"
+                 (config [:rabbitmq :queues "user-works.user.update"])
+                 channels/update-users)
+                (wire-up/external-service-channel
+                 @connection
+                 "user-works.user.delete"
+                 (config [:rabbitmq :queues "user-works.user.delete"])
+                 channels/delete-users)]}))
 
 (defn close-resources! [resources]
   (doseq [resource resources]

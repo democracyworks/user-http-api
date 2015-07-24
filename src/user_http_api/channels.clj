@@ -2,6 +2,9 @@
   (:require [clojure.core.async :as async]))
 
 (defonce create-users (async/chan))
+(defonce read-users (async/chan))
+(defonce update-users (async/chan))
+(defonce delete-users (async/chan))
 
 (defn start-event-handler!
   "Start a new thread listening for messages on `channel` and passing
@@ -28,5 +31,5 @@
      :notes signal-chan}))
 
 (defn close-all! []
-  (doseq [c [create-users]]
+  (doseq [c [create-users read-users update-users delete-users]]
     (async/close! c)))
