@@ -7,7 +7,6 @@
             [kehaar.core :as k]
             [kehaar.wire-up :as wire-up]
             [user-http-api.channels :as channels]
-            [user-http-api.handlers :as handlers]
             [turbovote.resource-config :refer [config]]))
 
 (defn initialize []
@@ -30,12 +29,7 @@
               (throw (ex-info "Connecting to RabbitMQ failed"
                               {:attempts attempt}))))))
     {:connections [@connection]
-     :channels [(wire-up/incoming-service-handler
-                 @connection
-                 "user-http-api.ok"
-                 (config [:rabbitmq :queues "user-http-api.ok"])
-                 handlers/ok)
-                (wire-up/external-service-channel
+     :channels [(wire-up/external-service-channel
                  @connection
                  "user-works.user.create"
                  (config [:rabbitmq :queues "user-works.user.create"])
