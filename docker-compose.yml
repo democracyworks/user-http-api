@@ -17,6 +17,6 @@ wildfly:
 rabbitmq:
   image: rabbitmq:3.5.3-management
   ports:
-    - "5672"
+    - "45672:5672"
     - "55672:15672"
   hostname: rabbitmq
