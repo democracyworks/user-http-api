@@ -26,9 +26,10 @@
   (interceptor
    {:enter
     (fn [ctx]
-      (let [user-data (get-in ctx [:request :body-params])]
+      (let [user-data (get-in ctx [:request :body-params])
+            result-chan (uw/create-user user-data)]
         (go
-          (let [result (<! (uw/create-user user-data))]
+          (let [result (<! result-chan)]
             (if (= (:status result) :ok)
               (let [user (:user result)]
                 (assoc ctx :response
@@ -46,9 +47,10 @@
     (fn [ctx]
       (let [user-id (-> ctx
                         (get-in [:request :path-params :id])
-                        java.util.UUID/fromString)]
+                        java.util.UUID/fromString)
+            result-chan (uw/read-user {:id user-id})]
         (go
-          (let [result (<! (uw/read-user {:id user-id}))]
+          (let [result (<! result-chan)]
             (if (= (:status result) :ok)
               (let [user (:user result)]
                 (assoc ctx :response
@@ -66,9 +68,10 @@
       (let [user-id (-> ctx
                         (get-in [:request :path-params :id])
                         java.util.UUID/fromString)
-            user-data (get-in ctx [:request :body-params])]
+            user-data (get-in ctx [:request :body-params])
+            result-chan (uw/update-user (merge user-data {:id user-id}))]
         (go
-          (let [result (<! (uw/update-user (merge user-data {:id user-id})))]
+          (let [result (<! result-chan)]
             (if (= (:status result) :ok)
               (let [user (:user result)]
                 (assoc ctx :response
@@ -85,9 +88,10 @@
     (fn [ctx]
       (let [user-id (-> ctx
                         (get-in [:request :path-params :id])
-                        java.util.UUID/fromString)]
+                        java.util.UUID/fromString)
+            result-chan (uw/delete-user {:id user-id})]
         (go
-          (let [result (<! (uw/delete-user {:id user-id}))]
+          (let [result (<! result-chan)]
             (if (= (:status result) :ok)
               (let [user (:user result)]
                 (assoc ctx :response
