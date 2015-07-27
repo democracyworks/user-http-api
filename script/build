@@ -24,10 +24,6 @@ if [[ -z $DOCKER_REPO ]]; then
 fi
 
 echo '--- building docker image'
-if [[ -n $DATOMIC_USERNAME && -n $DATOMIC_PASSWORD ]]; then
-  cat profiles.clj.sample | perl -pe 's/USERNAME/$ENV{"DATOMIC_USERNAME"}/' | \
-    perl -pe 's/PASSWORD/$ENV{"DATOMIC_PASSWORD"}/' > profiles.clj
-fi
 
 if [[ -z $BUILDKITE_BRANCH ]]; then
   BRANCH=$(git rev-parse --abbrev-ref HEAD)

@@ -5,8 +5,8 @@
             [langohr.exchange :as le]
             [langohr.queue :as lq]
             [kehaar.core :as k]
+            [kehaar.wire-up :as wire-up]
             [user-http-api.channels :as channels]
-            [user-http-api.handlers :as handlers]
             [turbovote.resource-config :refer [config]]))
 
 (defn initialize []
@@ -15,24 +15,40 @@
     (loop [attempt 1]
       (try
         (reset! connection
-                (rmq/connect (or (config :rabbitmq :connection)
+                (rmq/connect (or (config [:rabbitmq :connection])
                                  {})))
         (log/info "RabbitMQ connected.")
         (catch Throwable t
-          (log/warn "RabbitMQ not available:" (.getMessage t) "attempt:" attempt)))
+          (log/warn "RabbitMQ not available:" (.getMessage t)
+                    "attempt:" attempt)))
       (when (nil? @connection)
         (if (< attempt max-retries)
           (do (Thread/sleep (* attempt 1000))
               (recur (inc attempt)))
           (do (log/error "Connecting to RabbitMQ failed. Bailing.")
-              (throw (ex-info "Connecting to RabbitMQ failed" {:attempts attempt}))))))
-    (let [ok-ch (lch/open @connection)]
-      (lq/declare ok-ch
-                  "user-http-api.ok"
-                  (config :rabbitmq :queues "user-http-api.ok"))
-      (k/responder ok-ch "user-http-api.ok" handlers/ok)
-      {:connections #{@connection}
-       :channels #{ok-ch}})))
+              (throw (ex-info "Connecting to RabbitMQ failed"
+                              {:attempts attempt}))))))
+    {:connections [@connection]
+     :channels [(wire-up/external-service-channel
+                 @connection
+                 "user-works.user.create"
+                 (config [:rabbitmq :queues "user-works.user.create"])
+                 channels/create-users)
+                (wire-up/external-service-channel
+                 @connection
+                 "user-works.user.read"
+                 (config [:rabbitmq :queues "user-works.user.read"])
+                 channels/read-users)
+                (wire-up/external-service-channel
+                 @connection
+                 "user-works.user.update"
+                 (config [:rabbitmq :queues "user-works.user.update"])
+                 channels/update-users)
+                (wire-up/external-service-channel
+                 @connection
+                 "user-works.user.delete"
+                 (config [:rabbitmq :queues "user-works.user.delete"])
+                 channels/delete-users)]}))
 
 (defn close-resources! [resources]
   (doseq [resource resources]

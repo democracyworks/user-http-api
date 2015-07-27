@@ -34,15 +34,6 @@ TODO: Add usage
 
 ### With docker-compose
 
-First, create a `profiles.clj`.
-
-```
-> cp profiles.clj.sample profiles.clj
-```
-
-Edit the datomic username and password in `profiles.clj` (it won't be
-added to git).
-
 Build it:
 
 ```
@@ -56,6 +47,28 @@ Run it:
 ```
 
 TODO: If any more env vars are needed, add them to docker-compose command above.
+
+#### Connecting up a Cider REPL
+
+1. Run with `docker-compose up`.
+1. Figure out your boot2docker ip address, running `boot2docker ip`
+can tell you this.
+1. In emacs, run `M-x cider-connect`.
+1. When prompted for host, enter the boot2docker ip.
+1. When prompted for port, enter 1527 (as configured in the Dockerfile
+and docker-compose.yml)
+1. Open any namespace.
+1. `C-c C-k` to compile it.
+1. `C-c M-n` to place the REPL in your current namespace.
+1. Switch to your REPL buffer.
+1. Execute code to your heart's content.
+
+You can make code changes, recompile, and those changes will be loaded
+in the running JVM within Wildfly within the Docker container. You are
+hot patching new Clojure code into the running JVM instance. As long as
+you bind the NREPL server to a unique port per project you can have
+different Cider sessions simultaneously connected to different projects
+at the same time.
 
 ### Running in CoreOS
 

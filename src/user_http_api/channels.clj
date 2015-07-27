@@ -1,7 +1,11 @@
 (ns user-http-api.channels
   (:require [clojure.core.async :as async]))
 
-;;; TODO: Create channels and add them to the list of channels to close.
+(defonce create-users (async/chan))
+(defonce read-users (async/chan))
+(defonce update-users (async/chan))
+(defonce delete-users (async/chan))
+
 (defn close-all! []
-  (doseq [c []]
+  (doseq [c [create-users read-users update-users delete-users]]
     (async/close! c)))
