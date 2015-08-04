@@ -8,7 +8,7 @@
             [pedestal-toolbox.params :refer :all]
             [pedestal-toolbox.content-negotiation :refer :all]
             [kehaar.core :as k]
-            [clojure.core.async :refer [chan go <!]]
+            [clojure.core.async :refer [chan go alt! timeout]]
             [user-http-api.user-works :as uw]))
 
 (def ping
@@ -22,6 +22,8 @@
   (case (:status rabbit-result)
     :error 500)) ; TODO: Flesh this out once user-works gives us more error info
 
+(def response-timeout 10000)
+
 (def create-user
   (interceptor
    {:enter
@@ -29,7 +31,9 @@
       (let [user-data (get-in ctx [:request :body-params])
             result-chan (uw/create-user user-data)]
         (go
-          (let [result (<! result-chan)]
+          (let [result (alt! (timeout response-timeout) {:status :error
+                                                         :error :timeout}
+                             result-chan ([v] v))]
             (if (= (:status result) :ok)
               (let [user (:user result)]
                 (assoc ctx :response
@@ -40,7 +44,6 @@
                            (ring-resp/response)
                            (ring-resp/status http-status)))))))))}))
 
-
 (def read-user
   (interceptor
    {:enter
@@ -50,7 +53,9 @@
                         java.util.UUID/fromString)
             result-chan (uw/read-user {:id user-id})]
         (go
-          (let [result (<! result-chan)]
+          (let [result (alt! (timeout response-timeout) {:status :error
+                                                         :error :timeout}
+                             result-chan ([v] v))]
             (if (= (:status result) :ok)
               (let [user (:user result)]
                 (assoc ctx :response
@@ -71,7 +76,9 @@
             user-data (get-in ctx [:request :body-params])
             result-chan (uw/update-user (merge user-data {:id user-id}))]
         (go
-          (let [result (<! result-chan)]
+          (let [result (alt! (timeout response-timeout) {:status :error
+                                                         :error :timeout}
+                             result-chan ([v] v))]
             (if (= (:status result) :ok)
               (let [user (:user result)]
                 (assoc ctx :response
@@ -91,7 +98,9 @@
                         java.util.UUID/fromString)
             result-chan (uw/delete-user {:id user-id})]
         (go
-          (let [result (<! result-chan)]
+          (let [result (alt! (timeout response-timeout) {:status :error
+                                                         :error :timeout}
+                             result-chan ([v] v))]
             (if (= (:status result) :ok)
               (let [user (:user result)]
                 (assoc ctx :response
