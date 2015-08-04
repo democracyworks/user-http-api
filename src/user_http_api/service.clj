@@ -20,7 +20,9 @@
 (defn rabbit-result->http-status
   [rabbit-result]
   (case (:status rabbit-result)
-    :error 500)) ; TODO: Flesh this out once user-works gives us more error info
+    :error 500
+    :not-found 404
+    500)) ; TODO: Flesh this out once user-works gives us more error info
 
 (def response-timeout 10000)
 
