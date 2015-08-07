@@ -11,7 +11,7 @@
                  [ch.qos.logback/logback-classic "1.1.3"]
                  [io.pedestal/pedestal.service "0.4.0"]
                  [io.pedestal/pedestal.service-tools "0.4.0"]
-                 [democracyworks/pedestal-toolbox "0.6.1-SNAPSHOT"]
+                 [democracyworks/pedestal-toolbox "0.6.1"]
 
                  ;; this has to go before pedestal.immutant
                  ;; until this is fixed:
