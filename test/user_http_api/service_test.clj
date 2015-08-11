@@ -36,7 +36,7 @@
                      :email "troy@rockies.mlb.com"}]
       (dummy-response channels/create-users
                       {:user (merge {:id (java.util.UUID/randomUUID)} user-data)})
-      (let [response (http/post (str root-url "/")
+      (let [response (http/post (str root-url "/users")
                                 {:headers {"Content-Type" "application/edn"}
                                  :body (pr-str user-data)})
             create-data (clojure.edn/read-string (:body response))]
@@ -52,7 +52,7 @@
             transit-writer (transit/writer transit-out :json)
             post-body (do (transit/write transit-writer user-data)
                           (.toString transit-out "UTF-8"))
-            response (http/post (str root-url "/")
+            response (http/post (str root-url "/users")
                                 {:headers {"Content-Type" "application/transit+json"
                                            "Accept" "application/transit+json"}
                                  :body post-body})
@@ -66,7 +66,7 @@
   (testing "invalid EDN POST to / returns error"
     (let [user-data {:foo "bar"}]
       (dummy-response channels/create-users {:message "Fake error"} :error)
-      (let [response (http/post (str root-url "/")
+      (let [response (http/post (str root-url "/users")
                                 {:headers {"Content-Type" "application/edn"}
                                  :body (pr-str user-data)
                                  :throw-exceptions false})
@@ -83,7 +83,7 @@
                      :last-name "Tulowitski"
                      :email "troy@rockies.mlb.com"}]
       (dummy-response channels/read-users {:user user-data})
-      (let [response (http/get (str/join "/" [root-url user-id])
+      (let [response (http/get (str/join "/" [root-url "users" user-id])
                                {:accept :edn})
             read-data (clojure.edn/read-string (:body response))]
         (is (= 200 (:status response)))
@@ -95,7 +95,7 @@
                      :last-name "Tulowitski"
                      :email "troy@rockies.mlb.com"}]
       (dummy-response channels/read-users {:user user-data})
-      (let [response (http/get (str/join "/" [root-url user-id])
+      (let [response (http/get (str/join "/" [root-url "users" user-id])
                                {:accept :transit+json})
             transit-in (ByteArrayInputStream. (-> response
                                                   :body
@@ -106,7 +106,7 @@
         (is (= "Tulowitski" (:last-name read-data))))))
   (testing "GET non-existent /users/:id returns error"
     (dummy-response channels/read-users {:message "No such user"} :error)
-    (let [response (http/get (str/join "/" [root-url (java.util.UUID/randomUUID)])
+    (let [response (http/get (str/join "/" [root-url "users" (java.util.UUID/randomUUID)])
                               {:accept :edn, :throw-exceptions false})
           read-data (clojure.edn/read-string (:body response))]
       (is (= 500 (:status response)))
@@ -120,7 +120,7 @@
                      :last-name "Hill"
                      :email "escpawed@example.com"}]
       (dummy-response channels/update-users {:user user-data})
-      (let [response (http/put (str/join "/" [root-url user-id])
+      (let [response (http/put (str/join "/" [root-url "users" user-id])
                                {:body (pr-str user-data)
                                 :content-type :edn
                                 :accept :edn})
@@ -137,7 +137,7 @@
             transit-writer (transit/writer transit-out :json)
             post-body (do (transit/write transit-writer user-data)
                           (.toString transit-out "UTF-8"))
-            response (http/patch (str/join "/" [root-url user-id])
+            response (http/patch (str/join "/" [root-url "users" user-id])
                                  {:body post-body
                                   :content-type :transit+json
                                   :accept :transit+json})
@@ -150,7 +150,7 @@
         (is (= "Tulowitski" (:last-name update-data))))))
   (testing "PUT non-existent /users/:id returns error"
     (dummy-response channels/update-users {:message "No such user"} :error)
-    (let [response (http/put (str/join "/" [root-url (java.util.UUID/randomUUID)])
+    (let [response (http/put (str/join "/" [root-url "users" (java.util.UUID/randomUUID)])
                              {:body (pr-str {})
                               :content-type :edn
                               :accept :edn
@@ -164,7 +164,7 @@
   (testing "DELETE to /users/:id of existing user puts delete message on delete-users channel"
     (let [user-id (java.util.UUID/randomUUID)]
       (dummy-response channels/delete-users {:user {:id user-id}})
-      (let [response (http/delete (str/join "/" [root-url user-id])
+      (let [response (http/delete (str/join "/" [root-url "users" user-id])
                                   {:accept :edn})
             delete-data (clojure.edn/read-string (:body response))]
         (is (= 200 (:status response)))
@@ -172,7 +172,7 @@
   (testing "DELETE existing /users/:id with Transit+JSON response"
     (let [user-id (java.util.UUID/randomUUID)]
       (dummy-response channels/delete-users {:user {:id user-id}})
-      (let [response (http/delete (str/join "/" [root-url user-id])
+      (let [response (http/delete (str/join "/" [root-url "users" user-id])
                                   {:accept :transit+json})
             transit-in (ByteArrayInputStream. (-> response
                                                   :body
@@ -183,7 +183,7 @@
         (is (= user-id (:id delete-data))))))
   (testing "DELETE non-existent /users/:id returns error"
     (dummy-response channels/delete-users {:message "No such user"} :error)
-    (let [response (http/delete (str/join "/" [root-url (java.util.UUID/randomUUID)])
+    (let [response (http/delete (str/join "/" [root-url "users" (java.util.UUID/randomUUID)])
                                 {:accept :edn, :throw-exceptions false})
           delete-data (clojure.edn/read-string (:body response))]
       (is (= 500 (:status response)))
