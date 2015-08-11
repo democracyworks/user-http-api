@@ -135,7 +135,8 @@
                      (negotiate-response-content-type ["application/edn"
                                                        "application/transit+json"
                                                        "application/transit+msgpack"
-                                                       "application/json"])]
+                                                       "application/json"
+                                                       "text/plain"])]
      ["/:id" {:get [:get-user read-user]
                     :put [:put-user update-user]
                     :patch [:patch-user update-user]
