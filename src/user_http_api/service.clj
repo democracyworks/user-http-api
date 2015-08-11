@@ -137,14 +137,15 @@
                                                        "application/transit+msgpack"
                                                        "application/json"
                                                        "text/plain"])]
+     ["/ping" {:get [:ping ping]}]
      ["/:id" {:get [:get-user read-user]
                     :put [:put-user update-user]
                     :patch [:patch-user update-user]
-              :delete [:delete-user delete-user]}]
-     ["/ping" {:get [:ping ping]}]]]])
+              :delete [:delete-user delete-user]}]]]])
 
 (defn service []
   {::env :prod
+   ::bootstrap/router :linear-search ; we need this router to support both /:id & /ping
    ::bootstrap/routes routes
    ::bootstrap/resource-path "/public"
    ::bootstrap/host (config [:server :hostname])
