@@ -189,3 +189,10 @@
       (is (= 500 (:status response)))
       (is (= :error (:status delete-data)))
       (is (= "No such user" (:message delete-data))))))
+
+(deftest ping-test
+  (testing "ping should respond with 'OK'"
+    (let [response (http/get (str/join "/" [root-url "ping"])
+                             {:headers {:accept "text/plain"}})]
+      (is (= 200 (:status response)))
+      (is (= "OK" (:body response))))))
