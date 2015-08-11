@@ -129,18 +129,19 @@
 
 (defroutes routes
   [[["/"
-     {:post [:post-user create-user]}
      ^:interceptors [(body-params)
                      query-param-accept
                      (negotiate-response-content-type ["application/edn"
                                                        "application/transit+json"
                                                        "application/transit+msgpack"
-                                                       "application/json"])]
-     ["/:id" {:get [:get-user read-user]
-                    :put [:put-user update-user]
-                    :patch [:patch-user update-user]
-              :delete [:delete-user delete-user]}]
-     ["/ping" {:get [:ping ping]}]]]])
+                                                       "application/json"
+                                                       "text/plain"])]
+     ["/ping" {:get [:ping ping]}]
+     ["/users" {:post [:post-user create-user]}
+      ["/:id" {:get [:get-user read-user]
+                     :put [:put-user update-user]
+                     :patch [:patch-user update-user]
+                     :delete [:delete-user delete-user]}]]]]])
 
 (defn service []
   {::env :prod
