@@ -6,6 +6,7 @@ WORKDIR /usr/src/user-http-api
 COPY project.clj /usr/src/user-http-api/
 
 RUN lein deps
+RUN lein immutant war --name no-code-just-deps --destination target --nrepl-start
 
 COPY . /usr/src/user-http-api
 
