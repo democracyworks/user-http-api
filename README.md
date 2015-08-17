@@ -28,7 +28,38 @@ TODO: Add user-http-api specific configuration.
 
 ## Usage
 
-TODO: Add usage
+### Create
+
+POST to / with EDN or Transit payload matching the schema below:
+
+```clojure
+{:first-name "string"
+ :last-name "string"
+ :email "string" ; optional if phone isn't blank
+ :phone "string" ; optional if email isn't blank
+ :addresses {:type {:street "string"
+                    :street-2 "string"
+                    :city "string"
+                    :state "string"
+                    :zip "string"}}
+```
+
+### Read
+
+GET to /user-uuid
+
+### Update
+
+PUT or PATCH to /user-uuid with EDN or Transit payload matching the schema below:
+
+```clojure
+{:id #uuid "users-uuid-string"
+ :any-valid-create-field "new-string-value"}
+```
+
+### Delete
+
+DELETE to /user-uuid
 
 ## Running
 
