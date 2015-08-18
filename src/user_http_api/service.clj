@@ -39,7 +39,7 @@
             (if (= (:status result) :ok)
               (let [user (:user result)]
                 (assoc ctx :response
-                       (ring-resp/created (str "/users/" (:id user)) user)))
+                       (ring-resp/created (str "/" (:id user)) user)))
               (let [http-status (rabbit-result->http-status result)]
                 (assoc ctx :response
                        (-> result
