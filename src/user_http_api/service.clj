@@ -139,8 +139,8 @@
                                                        "text/plain"])]
      ["/ping" {:get [:ping ping]}]
      ["/:id" {:get [:get-user read-user]
-                    :put [:put-user update-user]
-                    :patch [:patch-user update-user]
+              :put [:put-user update-user]
+              :patch [:patch-user update-user]
               :delete [:delete-user delete-user]}]]]])
 
 (defn service []
