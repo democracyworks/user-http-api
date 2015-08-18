@@ -6,25 +6,17 @@ A REST API gateway for managing users.
 
 ## Configuration
 
-### New config
-
-New configuration on this app should be done in four steps:
-
-1. Add a configuration to the `resources/config.edn` file, using
-   `#resource-config/env` tagged literals for environment variables.
-2. Add the env var to the `user-http-api@.service.template` docker run
-   command, pulling in the value from Consul.
-   `--env FAKE_ENV_VAR=$(curl -s http://${COREOS_PRIVATE_IPV4}:8500/v1/kv/user-http-api/fake/env/var?raw)`
-3. Set up the value in Consul.
-4. Add them to the README.md (this file) in the Running with
-   docker-compose section as well as documented in the existing config
-   section.
-
-Keys in Consul should be appropriately namespaced, preferably under user-http-api.
-
-### Existing config
-
-TODO: Add user-http-api specific configuration.
+* ALLOWED_ORIGINS
+    * This env var controls the cross-origin resource sharing (CORS) settings.
+    * It should be set to one of the following:
+        * `:all` to allow requests from any origin
+        * an EDN seq of allowed origin strings
+        * an EDN map containing the following keys and values
+            * :allowed-origins - sequence of strings
+            * :creds - true or false, indicates whether client is allowed to send credentials
+            * :max-age - a long, indicates the number of seconds a client should cache the response from a preflight request
+            * :methods - a string, indicates the accepted HTTP methods.  Defaults to "GET, POST, PUT, DELETE, HEAD, PATCH, OPTIONS"
+    * For example: `ALLOWED_ORIGINS=["http://foo.example.com" "http://bar.example.com"]`
 
 ## Usage
 
