@@ -148,6 +148,9 @@
    ::bootstrap/router :linear-search ; we need this router to support both /:id & /ping
    ::bootstrap/routes routes
    ::bootstrap/resource-path "/public"
+   ::bootstrap/allowed-origins (if (= :all (config [:server :allowed-origins]))
+                                 (constantly true)
+                                 (config [:server :allowed-origins]))
    ::bootstrap/host (config [:server :hostname])
    ::bootstrap/type :immutant
    ::bootstrap/port (config [:server :port])})
