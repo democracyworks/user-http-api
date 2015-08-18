@@ -24,7 +24,7 @@
     :not-found 404
     500)) ; TODO: Flesh this out once user-works gives us more error info
 
-(def response-timeout 10000)
+(def response-timeout 20000)
 
 (def create-user
   (interceptor
