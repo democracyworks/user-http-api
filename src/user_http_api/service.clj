@@ -24,7 +24,7 @@
     :not-found 404
     500)) ; TODO: Flesh this out once user-works gives us more error info
 
-(def response-timeout 10000)
+(def response-timeout 20000)
 
 (def create-user
   (interceptor
@@ -34,12 +34,12 @@
             result-chan (uw/create-user user-data)]
         (go
           (let [result (alt! (timeout response-timeout) {:status :error
-                                                         :error :timeout}
+                                                         :error {:type :timeout}}
                              result-chan ([v] v))]
             (if (= (:status result) :ok)
               (let [user (:user result)]
                 (assoc ctx :response
-                       (ring-resp/created (str "/users/" (:id user)) user)))
+                       (ring-resp/created (str "/" (:id user)) user)))
               (let [http-status (rabbit-result->http-status result)]
                 (assoc ctx :response
                        (-> result
@@ -56,7 +56,7 @@
             result-chan (uw/read-user {:id user-id})]
         (go
           (let [result (alt! (timeout response-timeout) {:status :error
-                                                         :error :timeout}
+                                                         :error {:type :timeout}}
                              result-chan ([v] v))]
             (if (= (:status result) :ok)
               (let [user (:user result)]
@@ -79,7 +79,7 @@
             result-chan (uw/update-user (merge user-data {:id user-id}))]
         (go
           (let [result (alt! (timeout response-timeout) {:status :error
-                                                         :error :timeout}
+                                                         :error {:type :timeout}}
                              result-chan ([v] v))]
             (if (= (:status result) :ok)
               (let [user (:user result)]
@@ -101,7 +101,7 @@
             result-chan (uw/delete-user {:id user-id})]
         (go
           (let [result (alt! (timeout response-timeout) {:status :error
-                                                         :error :timeout}
+                                                         :error {:type :timeout}}
                              result-chan ([v] v))]
             (if (= (:status result) :ok)
               (let [user (:user result)]
@@ -139,8 +139,8 @@
                                                        "text/plain"])]
      ["/ping" {:get [:ping ping]}]
      ["/:id" {:get [:get-user read-user]
-                    :put [:put-user update-user]
-                    :patch [:patch-user update-user]
+              :put [:put-user update-user]
+              :patch [:patch-user update-user]
               :delete [:delete-user delete-user]}]]]])
 
 (defn service []
