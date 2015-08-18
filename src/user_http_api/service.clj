@@ -34,7 +34,7 @@
             result-chan (uw/create-user user-data)]
         (go
           (let [result (alt! (timeout response-timeout) {:status :error
-                                                         :error :timeout}
+                                                         :error {:type :timeout}}
                              result-chan ([v] v))]
             (if (= (:status result) :ok)
               (let [user (:user result)]
@@ -56,7 +56,7 @@
             result-chan (uw/read-user {:id user-id})]
         (go
           (let [result (alt! (timeout response-timeout) {:status :error
-                                                         :error :timeout}
+                                                         :error {:type :timeout}}
                              result-chan ([v] v))]
             (if (= (:status result) :ok)
               (let [user (:user result)]
@@ -79,7 +79,7 @@
             result-chan (uw/update-user (merge user-data {:id user-id}))]
         (go
           (let [result (alt! (timeout response-timeout) {:status :error
-                                                         :error :timeout}
+                                                         :error {:type :timeout}}
                              result-chan ([v] v))]
             (if (= (:status result) :ok)
               (let [user (:user result)]
@@ -101,7 +101,7 @@
             result-chan (uw/delete-user {:id user-id})]
         (go
           (let [result (alt! (timeout response-timeout) {:status :error
-                                                         :error :timeout}
+                                                         :error {:type :timeout}}
                              result-chan ([v] v))]
             (if (= (:status result) :ok)
               (let [user (:user result)]
