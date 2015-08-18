@@ -4,50 +4,43 @@
             [langohr.channel :as lch]
             [langohr.exchange :as le]
             [langohr.queue :as lq]
-            [kehaar.core :as k]
+            [kehaar.rabbitmq]
             [kehaar.wire-up :as wire-up]
             [user-http-api.channels :as channels]
             [turbovote.resource-config :refer [config]]))
 
 (defn initialize []
-  (let [connection (atom nil)
-        max-retries 5]
-    (loop [attempt 1]
-      (try
-        (reset! connection
-                (rmq/connect (or (config [:rabbitmq :connection])
-                                 {})))
-        (log/info "RabbitMQ connected.")
-        (catch Throwable t
-          (log/warn "RabbitMQ not available:" (.getMessage t)
-                    "attempt:" attempt)))
-      (when (nil? @connection)
-        (if (< attempt max-retries)
-          (do (Thread/sleep (* attempt 1000))
-              (recur (inc attempt)))
-          (do (log/error "Connecting to RabbitMQ failed. Bailing.")
-              (throw (ex-info "Connecting to RabbitMQ failed"
-                              {:attempts attempt}))))))
-    {:connections [@connection]
-     :channels [(wire-up/external-service-channel
-                 @connection
+  (let [max-retries 5
+        rabbit-config (config [:rabbitmq :connection])
+        connection (kehaar.rabbitmq/connect-with-retries rabbit-config max-retries)]
+    {:connections [connection]
+     :channels [(wire-up/external-service
+                 connection
+                 ""
                  "user-works.user.create"
                  (config [:rabbitmq :queues "user-works.user.create"])
+                 20000
                  channels/create-users)
-                (wire-up/external-service-channel
-                 @connection
+                (wire-up/external-service
+                 connection
+                 ""
                  "user-works.user.read"
                  (config [:rabbitmq :queues "user-works.user.read"])
+                 5000
                  channels/read-users)
-                (wire-up/external-service-channel
-                 @connection
+                (wire-up/external-service
+                 connection
+                 ""
                  "user-works.user.update"
                  (config [:rabbitmq :queues "user-works.user.update"])
+                 20000
                  channels/update-users)
-                (wire-up/external-service-channel
-                 @connection
+                (wire-up/external-service
+                 connection
+                 ""
                  "user-works.user.delete"
                  (config [:rabbitmq :queues "user-works.user.delete"])
+                 5000
                  channels/delete-users)]}))
 
 (defn close-resources! [resources]
