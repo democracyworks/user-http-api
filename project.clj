@@ -7,7 +7,7 @@
                  [org.clojure/tools.logging "0.3.1"]
                  [turbovote.resource-config "0.2.0"]
                  [com.novemberain/langohr "3.3.0"]
-                 [prismatic/schema "0.4.3"]
+                 [prismatic/schema "0.4.4"]
                  [ch.qos.logback/logback-classic "1.1.3"]
 
                  ;; core.async has to come before pedestal or kehaar.wire-up will
