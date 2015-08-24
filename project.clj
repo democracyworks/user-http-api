@@ -18,7 +18,7 @@
                  
                  [io.pedestal/pedestal.service "0.4.0"]
                  [io.pedestal/pedestal.service-tools "0.4.0"]
-                 [democracyworks/pedestal-toolbox "0.6.1"]
+                 [democracyworks/pedestal-toolbox "0.6.2"]
 
                  ;; this has to go before pedestal.immutant
                  ;; until this is fixed:
