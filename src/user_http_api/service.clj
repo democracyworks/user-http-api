@@ -17,12 +17,21 @@
     (fn [ctx]
       (assoc ctx :response (ring-resp/response "OK")))}))
 
+(defn rabbit-error->http-status
+  [rabbit-error]
+  (case (:type rabbit-error)
+    :semantic 400
+    :validation 400
+    :server 500
+    :timeout 504
+    500))
+
 (defn rabbit-result->http-status
   [rabbit-result]
   (case (:status rabbit-result)
-    :error 500
+    :error (rabbit-error->http-status (:error rabbit-result))
     :not-found 404
-    500)) ; TODO: Flesh this out once user-works gives us more error info
+    500))
 
 (def response-timeout 20000)
 
@@ -65,7 +74,7 @@
               (let [http-status (rabbit-result->http-status result)]
                 (assoc ctx :response
                        (-> result
-                           (ring-resp/response)
+                           ring-resp/response
                            (ring-resp/status http-status)))))))))}))
 
 (def update-user
