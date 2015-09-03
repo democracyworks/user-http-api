@@ -9,7 +9,9 @@
             [pedestal-toolbox.content-negotiation :refer :all]
             [kehaar.core :as k]
             [clojure.core.async :refer [chan go alt! timeout]]
-            [user-http-api.user-works :as uw]))
+            [user-http-api.channels :as channels]
+            [bifrost.core]
+            [clojure.tools.logging :as log]))
 
 (def ping
   (interceptor
@@ -17,102 +19,9 @@
     (fn [ctx]
       (assoc ctx :response (ring-resp/response "OK")))}))
 
-(defn rabbit-result->http-status
-  [rabbit-result]
-  (case (:status rabbit-result)
-    :error 500
-    :not-found 404
-    500)) ; TODO: Flesh this out once user-works gives us more error info
-
 (def response-timeout 20000)
 
-(def create-user
-  (interceptor
-   {:enter
-    (fn [ctx]
-      (let [user-data (get-in ctx [:request :body-params])
-            result-chan (uw/create-user user-data)]
-        (go
-          (let [result (alt! (timeout response-timeout) {:status :error
-                                                         :error {:type :timeout}}
-                             result-chan ([v] v))]
-            (if (= (:status result) :ok)
-              (let [user (:user result)]
-                (assoc ctx :response
-                       (ring-resp/created (str "/" (:id user)) user)))
-              (let [http-status (rabbit-result->http-status result)]
-                (assoc ctx :response
-                       (-> result
-                           (ring-resp/response)
-                           (ring-resp/status http-status)))))))))}))
-
-(def read-user
-  (interceptor
-   {:enter
-    (fn [ctx]
-      (let [user-id (-> ctx
-                        (get-in [:request :path-params :id])
-                        java.util.UUID/fromString)
-            result-chan (uw/read-user {:id user-id})]
-        (go
-          (let [result (alt! (timeout response-timeout) {:status :error
-                                                         :error {:type :timeout}}
-                             result-chan ([v] v))]
-            (if (= (:status result) :ok)
-              (let [user (:user result)]
-                (assoc ctx :response
-                       (ring-resp/response user)))
-              (let [http-status (rabbit-result->http-status result)]
-                (assoc ctx :response
-                       (-> result
-                           (ring-resp/response)
-                           (ring-resp/status http-status)))))))))}))
-
-(def update-user
-  (interceptor
-   {:enter
-    (fn [ctx]
-      (let [user-id (-> ctx
-                        (get-in [:request :path-params :id])
-                        java.util.UUID/fromString)
-            user-data (get-in ctx [:request :body-params])
-            result-chan (uw/update-user (merge user-data {:id user-id}))]
-        (go
-          (let [result (alt! (timeout response-timeout) {:status :error
-                                                         :error {:type :timeout}}
-                             result-chan ([v] v))]
-            (if (= (:status result) :ok)
-              (let [user (:user result)]
-                (assoc ctx :response
-                       (ring-resp/response user)))
-              (let [http-status (rabbit-result->http-status result)]
-                (assoc ctx :response
-                       (-> result
-                           (ring-resp/response)
-                           (ring-resp/status http-status)))))))))}))
-
-(def delete-user
-  (interceptor
-   {:enter
-    (fn [ctx]
-      (let [user-id (-> ctx
-                        (get-in [:request :path-params :id])
-                        java.util.UUID/fromString)
-            result-chan (uw/delete-user {:id user-id})]
-        (go
-          (let [result (alt! (timeout response-timeout) {:status :error
-                                                         :error {:type :timeout}}
-                             result-chan ([v] v))]
-            (if (= (:status result) :ok)
-              (let [user (:user result)]
-                (assoc ctx :response
-                       (ring-resp/response user)))
-              (let [http-status (rabbit-result->http-status result)]
-                (assoc ctx :response
-                       (-> result
-                           (ring-resp/response)
-                           (ring-resp/status http-status)))))))))}))
-
+;; Are we using this anywhere?
 (def query-param-accept
   "A before interceptor that fakes an Accept header so that later
   interceptors can handle the Accept header normally. This is used
@@ -127,21 +36,44 @@
         (assoc-in ctx [:request :headers "accept"] accept-type)
         ctx))}))
 
+(def api-translator
+  (interceptor
+   {:enter
+    (fn [ctx]
+      (let [id-key-path [:request :path-params :id]]
+        (if-let [user-id (get-in ctx id-key-path)]
+          (assoc-in ctx id-key-path (java.util.UUID/fromString user-id))
+          ctx)))
+    :leave
+    (fn [ctx]
+      (if-let [user (get-in ctx [:response :body :user])]
+        (assoc-in ctx [:response :body] user)
+        ctx))}))
+
+(def log-request
+  (interceptor
+   {:enter
+    (fn [ctx]
+      (log/info "Request:" (pr-str (:request ctx)))
+      ctx)}))
+
 (defroutes routes
   [[["/"
-     {:post [:post-user create-user]}
+     {:post [:post-user channels/create-users]}
      ^:interceptors [(body-params)
                      query-param-accept
                      (negotiate-response-content-type ["application/edn"
                                                        "application/transit+json"
                                                        "application/transit+msgpack"
                                                        "application/json"
-                                                       "text/plain"])]
+                                                       "text/plain"])
+                     api-translator
+                     log-request]
      ["/ping" {:get [:ping ping]}]
-     ["/:id" {:get [:get-user read-user]
-              :put [:put-user update-user]
-              :patch [:patch-user update-user]
-              :delete [:delete-user delete-user]}]]]])
+     ["/:id" {:get [:get-user channels/read-users]
+              :put [:put-user channels/update-users]
+              :patch [:patch-user channels/update-users]
+              :delete [:delete-user channels/delete-users]}]]]])
 
 (defn service []
   {::env :prod
