@@ -19,8 +19,6 @@
     (fn [ctx]
       (assoc ctx :response (ring-resp/response "OK")))}))
 
-(def response-timeout 20000)
-
 ;; Are we using this anywhere?
 (def query-param-accept
   "A before interceptor that fakes an Accept header so that later
