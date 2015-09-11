@@ -8,10 +8,8 @@
             [pedestal-toolbox.params :refer :all]
             [pedestal-toolbox.content-negotiation :refer :all]
             [kehaar.core :as k]
-            [clojure.core.async :refer [chan go alt! timeout]]
             [user-http-api.channels :as channels]
-            [bifrost.core]
-            [clojure.tools.logging :as log]))
+            [bifrost.core :as bifrost]))
 
 (def ping
   (interceptor
@@ -48,16 +46,9 @@
         (assoc-in ctx [:response :body] user)
         ctx))}))
 
-(def log-request
-  (interceptor
-   {:enter
-    (fn [ctx]
-      (log/info "Request:" (pr-str (:request ctx)))
-      ctx)}))
-
 (defroutes routes
   [[["/"
-     {:post [:post-user channels/create-users]}
+     {:post [:post-user (bifrost/interceptor channels/create-users)]}
      ^:interceptors [(body-params)
                      query-param-accept
                      (negotiate-response-content-type ["application/edn"
@@ -65,13 +56,12 @@
                                                        "application/transit+msgpack"
                                                        "application/json"
                                                        "text/plain"])
-                     api-translator
-                     log-request]
+                     api-translator]
      ["/ping" {:get [:ping ping]}]
-     ["/:id" {:get [:get-user channels/read-users]
-              :put [:put-user channels/update-users]
-              :patch [:patch-user channels/update-users]
-              :delete [:delete-user channels/delete-users]}]]]])
+     ["/:id" {:get [:get-user (bifrost/interceptor channels/read-users)]
+              :put [:put-user (bifrost/interceptor channels/update-users)]
+              :patch [:patch-user (bifrost/interceptor channels/update-users)]
+              :delete [:delete-user (bifrost/interceptor channels/delete-users)]}]]]])
 
 (defn service []
   {::env :prod
