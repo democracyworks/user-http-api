@@ -1,6 +1,5 @@
 (ns user-http-api.service-test
   (:require [user-http-api.server :as server]
-            [user-http-api.user-works :as uw]
             [user-http-api.channels :as channels]
             [clojure.test :refer :all]
             [clj-http.client :as http]
@@ -35,7 +34,8 @@
                      :last-name "Tulowitski"
                      :email "troy@rockies.mlb.com"}]
       (dummy-response channels/create-users
-                      {:user (merge {:id (java.util.UUID/randomUUID)} user-data)})
+                      {:user (merge {:id (java.util.UUID/randomUUID)} user-data)}
+                      :created)
       (let [response (http/post (str root-url "/")
                                 {:headers {"Content-Type" "application/edn"}
                                  :body (pr-str user-data)})
@@ -47,7 +47,8 @@
                      :last-name "Tulowitski"
                      :email "troy@rockies.mlb.com"}]
       (dummy-response channels/create-users
-                      {:user (merge {:id (java.util.UUID/randomUUID)} user-data)})
+                      {:user (merge {:id (java.util.UUID/randomUUID)} user-data)}
+                      :created)
       (let [transit-out (ByteArrayOutputStream.)
             transit-writer (transit/writer transit-out :json)
             post-body (do (transit/write transit-writer user-data)
@@ -65,14 +66,15 @@
         (is (= "Tulowitski" (:last-name create-data))))))
   (testing "invalid EDN POST to / returns error"
     (let [user-data {:foo "bar"}]
-      (dummy-response channels/create-users {:message "Fake error"} :error)
+      (dummy-response channels/create-users {:error {:type :server}
+                                             :message "Fake error"} :error)
       (let [response (http/post (str root-url "/")
                                 {:headers {"Content-Type" "application/edn"}
                                  :body (pr-str user-data)
                                  :throw-exceptions false})
             create-data (clojure.edn/read-string (:body response))]
         (is (= 500 (:status response)))
-        (is (= :error (:status create-data)))
+        (is (= :server (get-in create-data [:error :type])))
         (is (= "Fake error" (:message create-data)))))))
 
 (deftest read-user-test
@@ -105,12 +107,13 @@
         (is (= 200 (:status response)))
         (is (= "Tulowitski" (:last-name read-data))))))
   (testing "GET non-existent /users/:id returns error"
-    (dummy-response channels/read-users {:message "No such user"} :error)
+    (dummy-response channels/read-users {:error {:type :not-found}
+                                         :message "No such user"} :error)
     (let [response (http/get (str/join "/" [root-url (java.util.UUID/randomUUID)])
                               {:accept :edn, :throw-exceptions false})
           read-data (clojure.edn/read-string (:body response))]
-      (is (= 500 (:status response)))
-      (is (= :error (:status read-data)))
+      (is (= 404 (:status response)))
+      (is (= :not-found (get-in read-data [:error :type])))
       (is (= "No such user" (:message read-data))))))
 
 (deftest update-user-test
@@ -149,15 +152,16 @@
         (is (= 200 (:status response)))
         (is (= "Tulowitski" (:last-name update-data))))))
   (testing "PUT non-existent /users/:id returns error"
-    (dummy-response channels/update-users {:message "No such user"} :error)
+    (dummy-response channels/update-users {:error {:type :not-found}
+                                           :message "No such user"} :error)
     (let [response (http/put (str/join "/" [root-url (java.util.UUID/randomUUID)])
                              {:body (pr-str {})
                               :content-type :edn
                               :accept :edn
                               :throw-exceptions false})
           update-data (clojure.edn/read-string (:body response))]
-      (is (= 500 (:status response)))
-      (is (= :error (:status update-data)))
+      (is (= 404 (:status response)))
+      (is (= :not-found (get-in update-data [:error :type])))
       (is (= "No such user" (:message update-data))))))
 
 (deftest delete-user-test
@@ -182,12 +186,13 @@
         (is (= 200 (:status response)))
         (is (= user-id (:id delete-data))))))
   (testing "DELETE non-existent /users/:id returns error"
-    (dummy-response channels/delete-users {:message "No such user"} :error)
+    (dummy-response channels/delete-users {:error {:type :not-found}
+                                           :message "No such user"} :error)
     (let [response (http/delete (str/join "/" [root-url (java.util.UUID/randomUUID)])
                                 {:accept :edn, :throw-exceptions false})
           delete-data (clojure.edn/read-string (:body response))]
-      (is (= 500 (:status response)))
-      (is (= :error (:status delete-data)))
+      (is (= 404 (:status response)))
+      (is (= :not-found (get-in delete-data [:error :type])))
       (is (= "No such user" (:message delete-data))))))
 
 (deftest ping-test
