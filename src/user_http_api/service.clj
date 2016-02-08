@@ -5,6 +5,7 @@
             [io.pedestal.interceptor :refer [interceptor]]
             [ring.util.response :as ring-resp]
             [turbovote.resource-config :refer [config]]
+            [pedestal-toolbox.cors :as cors]
             [pedestal-toolbox.params :refer :all]
             [pedestal-toolbox.content-negotiation :refer :all]
             [kehaar.core :as k]
@@ -16,21 +17,6 @@
    {:enter
     (fn [ctx]
       (assoc ctx :response (ring-resp/response "OK")))}))
-
-;; Are we using this anywhere?
-(def query-param-accept
-  "A before interceptor that fakes an Accept header so that later
-  interceptors can handle the Accept header normally. This is used
-  because it's literally impossible to make a clickable link in a
-  browser that sets the Accept header in the normal way.
-
-  To use, add an accept=application/csv to the URL query string."
-  (interceptor
-   {:enter
-    (fn [ctx]
-      (if-let [accept-type (get-in ctx [:request :params :accept])]
-        (assoc-in ctx [:request :headers "accept"] accept-type)
-        ctx))}))
 
 (def api-translator
   (interceptor
@@ -68,9 +54,9 @@
    ::bootstrap/router :linear-search ; we need this router to support both /:id & /ping
    ::bootstrap/routes routes
    ::bootstrap/resource-path "/public"
-   ::bootstrap/allowed-origins (if (= :all (config [:server :allowed-origins]))
-                                 (constantly true)
-                                 (config [:server :allowed-origins]))
+   ::bootstrap/allowed-origins (cors/domain-matcher-fn
+                                (map re-pattern
+                                     (config [:server :allowed-origins])))
    ::bootstrap/host (config [:server :hostname])
    ::bootstrap/type :immutant
    ::bootstrap/port (config [:server :port])})
