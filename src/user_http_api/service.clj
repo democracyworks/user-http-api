@@ -18,21 +18,6 @@
     (fn [ctx]
       (assoc ctx :response (ring-resp/response "OK")))}))
 
-;; Are we using this anywhere?
-(def query-param-accept
-  "A before interceptor that fakes an Accept header so that later
-  interceptors can handle the Accept header normally. This is used
-  because it's literally impossible to make a clickable link in a
-  browser that sets the Accept header in the normal way.
-
-  To use, add an accept=application/csv to the URL query string."
-  (interceptor
-   {:enter
-    (fn [ctx]
-      (if-let [accept-type (get-in ctx [:request :params :accept])]
-        (assoc-in ctx [:request :headers "accept"] accept-type)
-        ctx))}))
-
 (def api-translator
   (interceptor
    {:enter
