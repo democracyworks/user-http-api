@@ -26,7 +26,7 @@
                  ""
                  "user-works.user.read"
                  (config [:rabbitmq :queues "user-works.user.read"])
-                 5000
+                 10000
                  channels/read-users)
                 (wire-up/external-service
                  connection
@@ -40,7 +40,7 @@
                  ""
                  "user-works.user.delete"
                  (config [:rabbitmq :queues "user-works.user.delete"])
-                 5000
+                 10000
                  channels/delete-users)]}))
 
 (defn close-resources! [resources]
