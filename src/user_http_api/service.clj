@@ -34,20 +34,32 @@
 
 (defroutes routes
   [[["/"
-     {:post [:post-user (bifrost/interceptor channels/create-users)]}
+     {:post [:post-user
+             (bifrost/interceptor channels/create-users
+                                  (config [:timeouts :user-create]))]}
      ^:interceptors [(body-params)
                      query-param-accept
-                     (negotiate-response-content-type ["application/edn"
-                                                       "application/transit+json"
-                                                       "application/transit+msgpack"
-                                                       "application/json"
-                                                       "text/plain"])
+                     (negotiate-response-content-type
+                      ["application/edn"
+                       "application/transit+json"
+                       "application/transit+msgpack"
+                       "application/json"
+                       "text/plain"])
                      api-translator]
      ["/ping" {:get [:ping ping]}]
-     ["/:id" {:get [:get-user (bifrost/interceptor channels/read-users)]
-              :put [:put-user (bifrost/interceptor channels/update-users)]
-              :patch [:patch-user (bifrost/interceptor channels/update-users)]
-              :delete [:delete-user (bifrost/interceptor channels/delete-users)]}]]]])
+     ["/:id" {:get [:get-user
+                    (bifrost/interceptor channels/read-users
+                                         (config [:timeouts :user-read]))]
+              :put [:put-user
+                    (bifrost/interceptor channels/update-users
+                                         (config [:timeouts :user-update]))]
+              :patch [:patch-user
+                      (bifrost/interceptor channels/update-users
+                                           (config [:timeouts :user-update]))]
+              :delete [:delete-user
+                       (bifrost/interceptor
+                        channels/delete-users
+                        (config [:timeouts :user-delete]))]}]]]])
 
 (defn service []
   {::env :prod

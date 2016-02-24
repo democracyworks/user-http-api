@@ -19,28 +19,28 @@
                  ""
                  "user-works.user.create"
                  (config [:rabbitmq :queues "user-works.user.create"])
-                 20000
+                 (config [:timeouts :user-create])
                  channels/create-users)
                 (wire-up/external-service
                  connection
                  ""
                  "user-works.user.read"
                  (config [:rabbitmq :queues "user-works.user.read"])
-                 10000
+                 (config [:timeouts :user-read])
                  channels/read-users)
                 (wire-up/external-service
                  connection
                  ""
                  "user-works.user.update"
                  (config [:rabbitmq :queues "user-works.user.update"])
-                 20000
+                 (config [:timeouts :user-update])
                  channels/update-users)
                 (wire-up/external-service
                  connection
                  ""
                  "user-works.user.delete"
                  (config [:rabbitmq :queues "user-works.user.delete"])
-                 10000
+                 (config [:timeouts :user-delete])
                  channels/delete-users)]}))
 
 (defn close-resources! [resources]
