@@ -42,6 +42,7 @@
             create-data (clojure.edn/read-string (:body response))]
         (is (= 201 (:status response)))
         (is (= "Tulowitski" (:last-name create-data))))))
+
   (testing "valid Transit+JSON POST to / puts create message on create-users channel"
     (let [user-data {:first-name "Troy"
                      :last-name "Tulowitski"
@@ -64,6 +65,7 @@
             create-data (transit/read transit-reader)]
         (is (= 201 (:status response)))
         (is (= "Tulowitski" (:last-name create-data))))))
+
   (testing "invalid EDN POST to / returns error"
     (let [user-data {:foo "bar"}]
       (dummy-response channels/create-users {:error {:type :server}
@@ -90,6 +92,7 @@
             read-data (clojure.edn/read-string (:body response))]
         (is (= 200 (:status response)))
         (is (= "Tulowitski" (:last-name read-data))))))
+
   (testing "GET existing /users/:id with Transit+JSON response"
     (let [user-id (java.util.UUID/randomUUID)
           user-data {:id user-id
@@ -106,6 +109,7 @@
             read-data (transit/read transit-reader)]
         (is (= 200 (:status response)))
         (is (= "Tulowitski" (:last-name read-data))))))
+
   (testing "GET non-existent /users/:id returns error"
     (dummy-response channels/read-users {:error {:type :not-found}
                                          :message "No such user"} :error)
@@ -130,6 +134,7 @@
             update-data (clojure.edn/read-string (:body response))]
         (is (= 200 (:status response)))
         (is (= "Hill" (:last-name update-data))))))
+
   (testing "PATCH existing /users/:id with Transit+JSON body & response"
     (let [user-id (java.util.UUID/randomUUID)
           user-data {:first-name "Troy"
@@ -151,6 +156,7 @@
             update-data (transit/read transit-reader)]
         (is (= 200 (:status response)))
         (is (= "Tulowitski" (:last-name update-data))))))
+
   (testing "PUT non-existent /users/:id returns error"
     (dummy-response channels/update-users {:error {:type :not-found}
                                            :message "No such user"} :error)
@@ -173,6 +179,7 @@
             delete-data (clojure.edn/read-string (:body response))]
         (is (= 200 (:status response)))
         (is (= user-id (:id delete-data))))))
+
   (testing "DELETE existing /users/:id with Transit+JSON response"
     (let [user-id (java.util.UUID/randomUUID)]
       (dummy-response channels/delete-users {:user {:id user-id}})
@@ -185,6 +192,7 @@
             delete-data (transit/read transit-reader)]
         (is (= 200 (:status response)))
         (is (= user-id (:id delete-data))))))
+
   (testing "DELETE non-existent /users/:id returns error"
     (dummy-response channels/delete-users {:error {:type :not-found}
                                            :message "No such user"} :error)
