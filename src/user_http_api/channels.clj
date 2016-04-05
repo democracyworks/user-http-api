@@ -5,7 +5,9 @@
 (defonce read-users (async/chan))
 (defonce update-users (async/chan))
 (defonce delete-users (async/chan))
+(defonce admin-users-search (async/chan))
 
 (defn close-all! []
-  (doseq [c [create-users read-users update-users delete-users]]
+  (doseq [c [create-users read-users update-users
+             delete-users admin-users-search]]
     (async/close! c)))

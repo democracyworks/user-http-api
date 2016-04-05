@@ -40,6 +40,22 @@ POST to / with EDN or Transit payload matching the schema below:
 
 GET to /user-uuid
 
+### Search
+
+The beginnings of an admin search tool are coalescing. Make GET request to
+`/admin/search` containing an EDN or Transit payload matching the following
+schema:
+
+```clojure
+{(s/optional-key :user/first-name) s/Str
+ (s/optional-key :user/last-name) s/Str
+ (s/optional-key :user/email) s/Str
+ (s/optional-key :user/phone) s/Str}
+```
+
+Any keys that are non-nil will be included in the *AND* style query; any keys
+that are nil will be excluded from the query.
+
 ### Update
 
 PUT or PATCH to /user-uuid with EDN or Transit payload matching the schema below:

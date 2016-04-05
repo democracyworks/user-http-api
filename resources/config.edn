@@ -4,11 +4,13 @@
  :timeouts {:user-create 20000
             :user-read 10000
             :user-update 20000
-            :user-delete 10000}
+            :user-delete 10000
+            :admin-users-search 10000}
  :rabbitmq {:connection {:host #resource-config/env "RABBITMQ_PORT_5672_TCP_ADDR"
                          :port #resource-config/edn #resource-config/env "RABBITMQ_PORT_5672_TCP_PORT"}
             :queues {"user-http-api.ok" {:exclusive false :durable true :auto-delete false}
                      "user-works.user.create" {:exclusive false :durable true :auto-delete false}
                      "user-works.user.read" {:exclusive false :durable true :auto-delete false}
                      "user-works.user.update" {:exclusive false, :durable true :auto-delete false}
-                     "user-works.user.delete" {:exclusive false, :durable true :auto-delete false}}}}
+                     "user-works.user.delete" {:exclusive false, :durable true :auto-delete false}
+                     "user-works.admin.users.search" {:exclusive false, :durable true :auto-delete false}}}}

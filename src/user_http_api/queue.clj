@@ -41,7 +41,14 @@
                  "user-works.user.delete"
                  (config [:rabbitmq :queues "user-works.user.delete"])
                  (config [:timeouts :user-delete])
-                 channels/delete-users)]}))
+                 channels/delete-users)
+                (wire-up/external-service
+                 connection
+                 ""
+                 "user-works.admin.users.search"
+                 (config [:rabbitmq :queues "user-works.admin.users.search"])
+                 (config [:timeouts :admin-users-search])
+                 channels/admin-users-search)]}))
 
 (defn close-resources! [resources]
   (doseq [resource resources]

@@ -59,7 +59,11 @@
               :delete [:delete-user
                        (bifrost/interceptor
                         channels/delete-users
-                        (config [:timeouts :user-delete]))]}]]]])
+                        (config [:timeouts :user-delete]))]}]
+     ["/users/search" {:get [:search-users
+                             (bifrost/interceptor
+                              channels/admin-users-search
+                              (config [:timeouts :admin-users-search]))]}]]]])
 
 (defn service []
   {::env :prod
