@@ -10,7 +10,9 @@
             [pedestal-toolbox.content-negotiation :refer :all]
             [kehaar.core :as k]
             [user-http-api.channels :as channels]
-            [bifrost.core :as bifrost]))
+            [bifrost.core :as bifrost]
+            [bifrost.interceptors :as bifrost.i]
+            [clojure.tools.logging :as log]))
 
 (def ping
   (interceptor
@@ -32,6 +34,13 @@
         (assoc-in ctx [:response :body] user)
         ctx))}))
 
+(def fetch-params
+  (bifrost.i/update-in-request
+   [:body-params]
+   [:bifrost-params]
+   (fn [m]
+     (into {} (filter (comp some? val) m)))))
+
 (defroutes routes
   [[["/"
      {:post [:post-user
@@ -47,6 +56,9 @@
                        "text/plain"])
                      api-translator]
      ["/ping" {:get [:ping ping]}]
+     ["/search"
+      {:get [:search (bifrost/interceptor channels/admin-users-search)]}
+      ^:interceptors [fetch-params]]
      ["/:id" {:get [:get-user
                     (bifrost/interceptor channels/read-users
                                          (config [:timeouts :user-read]))]
@@ -59,11 +71,7 @@
               :delete [:delete-user
                        (bifrost/interceptor
                         channels/delete-users
-                        (config [:timeouts :user-delete]))]}]
-     ["/users/search" {:get [:search-users
-                             (bifrost/interceptor
-                              channels/admin-users-search
-                              (config [:timeouts :admin-users-search]))]}]]]])
+                        (config [:timeouts :user-delete]))]}]]]])
 
 (defn service []
   {::env :prod

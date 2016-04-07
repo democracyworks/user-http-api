@@ -43,8 +43,7 @@ GET to /user-uuid
 ### Search
 
 The beginnings of an admin search tool are coalescing. Make GET request to
-`/admin/search` containing an EDN or Transit payload matching the following
-schema:
+`/search` containing an EDN or Transit payload matching the following schema:
 
 ```clojure
 {(s/optional-key :user/first-name) s/Str
@@ -54,7 +53,8 @@ schema:
 ```
 
 Any keys that are non-nil will be included in the *AND* style query; any keys
-that are nil will be excluded from the query.
+that are nil will be excluded from the query. Case is important - the ability to
+do a case-insensitive search is pending.
 
 ### Update
 
