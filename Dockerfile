@@ -1,14 +1,17 @@
-FROM quay.io/democracyworks/didor:latest
+FROM clojure:lein-2.7.1-alpine
 
 RUN mkdir -p /usr/src/user-http-api
 WORKDIR /usr/src/user-http-api
 
 COPY project.clj /usr/src/user-http-api/
 
-RUN lein deps
-RUN lein immutant war --name no-code-just-deps --destination target --nrepl-start
+ARG env=production
+
+RUN lein with-profile $env deps
 
 COPY . /usr/src/user-http-api
 
-RUN lein test
-RUN lein immutant war --name user-http-api --destination target --nrepl-port=1527 --nrepl-start --nrepl-host=0.0.0.0
+RUN lein with-profiles $env,test test
+RUN lein with-profile $env uberjar
+
+CMD ["java", "-jar", "target/user-http-api.jar"]

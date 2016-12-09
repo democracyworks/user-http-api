@@ -4,7 +4,8 @@
             [turbovote.resource-config :refer [config]]
             [immutant.util :as immutant]
             [user-http-api.channels :as channels]
-            [user-http-api.queue :as queue]))
+            [user-http-api.queue :as queue])
+  (:gen-class))
 
 (defn shutdown [rabbit-resources]
   (channels/close-all!)
