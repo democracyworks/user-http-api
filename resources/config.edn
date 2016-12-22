@@ -7,8 +7,20 @@
             :user-delete 10000}
  :rabbitmq {:connection {:host #resource-config/env "RABBITMQ_PORT_5672_TCP_ADDR"
                          :port #resource-config/edn #resource-config/env "RABBITMQ_PORT_5672_TCP_PORT"}
-            :queues {"user-http-api.ok" {:exclusive false :durable true :auto-delete false}
-                     "user-works.user.create" {:exclusive false :durable true :auto-delete false}
-                     "user-works.user.read" {:exclusive false :durable true :auto-delete false}
-                     "user-works.user.update" {:exclusive false, :durable true :auto-delete false}
-                     "user-works.user.delete" {:exclusive false, :durable true :auto-delete false}}}}
+            :kehaar {:external-services
+                     [{:queue "user-works.user.create"
+                       :channel user-http-api.channels/create-users
+                       :response true
+                       :timeout 20000}
+                      {:queue "user-works.user.read"
+                       :channel user-http-api.channels/read-users
+                       :response true
+                       :timeout 10000}
+                      {:queue "user-works.user.update"
+                       :channel user-http-api.channels/update-users
+                       :response true
+                       :timeout 20000}
+                      {:queue "user-works.user.delete"
+                       :channel user-http-api.channels/delete-users
+                       :response true
+                       :timeout 10000}]}}}
