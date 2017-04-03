@@ -5,8 +5,8 @@
             :user-read 10000
             :user-update 20000
             :user-delete 10000}
- :rabbitmq {:connection {:host #resource-config/env "RABBITMQ_PORT_5672_TCP_ADDR"
-                         :port #resource-config/edn #resource-config/env "RABBITMQ_PORT_5672_TCP_PORT"}
+ :rabbitmq {:connection {:host #resource-config/env "RABBITMQ_HOST"
+                         :port 5672}
             :kehaar {:external-services
                      [{:queue "user-works.user.create"
                        :channel user-http-api.channels/create-users

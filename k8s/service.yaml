@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-http-api
+spec:
+  selector:
+    app: user-http-api
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP

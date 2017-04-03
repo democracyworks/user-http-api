@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: user-http-api
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    traefik.frontend.rule.type: pathprefixstrip
+spec:
+  rules:
+  - host: testapi.democracy.works
+    http:
+      paths:
+      - path: /users
+        backend:
+          serviceName: user-http-api
+          servicePort: 8080
