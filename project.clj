@@ -7,14 +7,14 @@
                  [org.clojure/tools.logging "0.3.1"]
                  [turbovote.resource-config "0.2.1"]
                  [com.novemberain/langohr "3.7.0"]
-                 [prismatic/schema "1.1.5"]
+                 [prismatic/schema "1.1.6"]
                  [ch.qos.logback/logback-classic "1.2.3"]
 
                  ;; core.async has to come before pedestal or kehaar.wire-up will
                  ;; not compile. Something to do with the try-catch in
                  ;; kehaar.core/go-handler.
                  [org.clojure/core.async "0.3.442"]
-                 [democracyworks/kehaar "0.10.3"]
+                 [democracyworks/kehaar "0.10.4"]
 
                  [io.pedestal/pedestal.service "0.5.2"]
                  [io.pedestal/pedestal.service-tools "0.5.2"]
@@ -28,7 +28,7 @@
                  [org.immutant/core "2.1.6"]
                  [democracyworks/bifrost "0.1.5"]]
   :plugins [[lein-immutant "2.1.0"]
-            [com.carouselapps/jar-copier "0.3.1"]]
+            [com.pupeno/jar-copier "0.4.0"]]
   :java-agents [[com.newrelic.agent.java/newrelic-agent "3.35.1"]]
   :jar-copier {:java-agents true
                :destination "resources/jars"}
