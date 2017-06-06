@@ -3,7 +3,7 @@
   :url "https://github.com/democracyworks/user-http-api"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha17"]
                  [org.clojure/tools.logging "0.3.1"]
                  [turbovote.resource-config "0.2.1"]
                  [com.novemberain/langohr "3.7.0"]
