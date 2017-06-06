@@ -110,7 +110,7 @@
     (dummy-response channels/read-users {:error {:type :not-found}
                                          :message "No such user"} :error)
     (let [response (http/get (str/join "/" [root-url (java.util.UUID/randomUUID)])
-                              {:accept :edn, :throw-exceptions false})
+                             {:accept :edn, :throw-exceptions false})
           read-data (clojure.edn/read-string (:body response))]
       (is (= 404 (:status response)))
       (is (= :not-found (get-in read-data [:error :type])))
