@@ -10,7 +10,8 @@
             [pedestal-toolbox.content-negotiation :refer :all]
             [kehaar.core :as k]
             [user-http-api.channels :as channels]
-            [bifrost.core :as bifrost]))
+            [bifrost.core :as bifrost])
+  (:import (java.util UUID)))
 
 (def ping
   (interceptor
@@ -24,7 +25,7 @@
     (fn [ctx]
       (let [id-key-path [:request :path-params :id]]
         (if-let [user-id (get-in ctx id-key-path)]
-          (assoc-in ctx id-key-path (java.util.UUID/fromString user-id))
+          (assoc-in ctx id-key-path (UUID/fromString user-id))
           ctx)))
     :leave
     (fn [ctx]
