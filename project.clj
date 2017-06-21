@@ -3,7 +3,7 @@
   :url "https://github.com/democracyworks/user-http-api"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha17"]
                  [org.clojure/tools.logging "0.3.1"]
                  [turbovote.resource-config "0.2.1"]
                  [com.novemberain/langohr "3.7.0"]
@@ -14,7 +14,7 @@
                  ;; not compile. Something to do with the try-catch in
                  ;; kehaar.core/go-handler.
                  [org.clojure/core.async "0.3.442"]
-                 [democracyworks/kehaar "0.10.4"]
+                 [democracyworks/kehaar "0.11.0"]
 
                  [io.pedestal/pedestal.service "0.5.2"]
                  [io.pedestal/pedestal.service-tools "0.5.2"]
